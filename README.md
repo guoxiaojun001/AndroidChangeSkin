@@ -4,26 +4,24 @@
 与之前发布的ChangeSkin思路完全不同[https://github.com/hongyangAndroid/ChangeSkin](https://github.com/hongyangAndroid/ChangeSkin)，主要因为ChangeSkin依赖V4，V7的版本，以及干涉系统构造View的过程，于是希望找到一个几乎没有侵入的方式来实现，于是产生了AndroidChangeSkin，两个项目各有特点，目前两个项目代码都保留，欢迎试用与反馈。
 
 
-//***************中心思想****************************
-/n
-说明：加载的方法是通过反射，通过调用AssetManager中的addAssetPath方法，我们可以将一个apk中的资源加载到Resources中，由于addAssetPath是隐藏api我们无法直接调用，所以只能通过反射，下面是它的声明，通过注释我们可以看出，传递的路径可以是zip文件也可以是一个资源目录，而apk就是一个zip，所以直接将apk的路径传给它，资源就加载到AssetManager中了，然后再通过AssetManager来创建一个新的Resources对象，这个对象就是我们可以使用的apk中的资源了，这样我们的问题就解决了。
-protected void loadResources() {  
-    try {  
-        AssetManager assetManager = AssetManager.class.newInstance();  
-        Method addAssetPath = assetManager.getClass().getMethod("addAssetPath", String.class);  
-        addAssetPath.invoke(assetManager, mDexPath);  
-        mAssetManager = assetManager;  
-    } catch (Exception e) {  
-        e.printStackTrace();  
-    }  
-    Resources superRes = super.getResources();
-    //Resources superRes = mContext.getResources();
+//************中心思想************************* 
 
-    mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(),  
-            superRes.getConfiguration());  
-    mTheme = mResources.newTheme();  
-    mTheme.setTo(super.getTheme());  
-} 
+说明：加载的方法是通过反射，通过调用AssetManager中的addAssetPath方法，我们可以将一个apk中的资源加载到Resources中，由于addAssetPath是隐藏api我们无法直接调用，所以只能通过反射，下面是它的声明，通过注释我们可以看出，传递的路径可以是zip文件也可以是一个资源目录，而apk就是一个zip，所以直接将apk的路径传给它，资源就加载到AssetManager中了，然后再通过AssetManager来创建一个新的Resources对象，这个对象就是我们可以使用的apk中的资源了，这样我们的问题就解决了。 protected void loadResources() {
+try {
+AssetManager assetManager = AssetManager.class.newInstance();
+Method addAssetPath = assetManager.getClass().getMethod("addAssetPath", String.class);
+addAssetPath.invoke(assetManager, mDexPath);
+mAssetManager = assetManager;
+} catch (Exception e) {
+e.printStackTrace();
+}
+Resources superRes = super.getResources(); //Resources superRes = mContext.getResources();
+
+mResources = new Resources(mAssetManager, superRes.getDisplayMetrics(),  
+        superRes.getConfiguration());  
+mTheme = mResources.newTheme();  
+mTheme.setTo(super.getTheme());  
+}
 
 //*******************************************
 
